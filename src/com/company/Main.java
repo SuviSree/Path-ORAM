@@ -17,6 +17,8 @@ public class Main {
         client.printPositionMap();
         client.printStash();
         client.access("read", 2, null);
+        client.access("read", 2, null);
+        client.access("read", 2, null);
 //        client.nodeIndexAtLevel(1,3);
 //        client.nodeIndexAtLevel(3,2);
 //        client.nodeIndexAtLevel(6,1);

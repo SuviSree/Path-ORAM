@@ -7,7 +7,8 @@ public class Client {
     int totalNodes = (int) Math.pow(2,height+1) - 1;
     int totalPaths = (totalNodes + 1)/2;
     Map<Integer, Integer> positionMap = new HashMap<>();
-    List<StashedItem> stash = new ArrayList<>();
+    List<Integer> stash = new ArrayList<>();
+    HashMap<Integer, Integer> dummyBlocks = new HashMap();
 
     public void initiate() {
         Random random = new Random();
@@ -18,9 +19,9 @@ public class Client {
         List <Integer> overflowedData = server.initiate(positionMap);
         for(Integer i : overflowedData) {
             System.out.println("stashed : " + i);
-            stash.add(new StashedItem(i, positionMap.get(i)));
-            positionMap.put(i, null);
+            stash.add(i);
         }
+        dummyBlocks = server.fillEmptyBlocksWithDummy();
     }
 
     public void printPositionMap() {
@@ -39,47 +40,62 @@ public class Client {
 
     public void printStash() {
         System.out.println("\n\nStash");
-        for(StashedItem i : stash) {
-            System.out.print(i.block + "," + i.path + " ");
+        for(Integer i : stash) {
+            System.out.print(i + " ");
         }
+        System.out.print("\n\n");
+    }
+
+    public void printDummies() {
+        System.out.println("\n\nDummy block positions");
+        dummyBlocks.entrySet().forEach(entry->{
+            System.out.print(entry.getKey() + "\t");
+        });
         System.out.print("\n\n");
     }
 
     public void access(String operation, int block, Integer data) {
         Random random = new Random();
         int path = positionMap.get(block);
-        List <Integer> pathItems = server.readPath(path);
+        List <BlockInfo> pathItems = server.readPath(path);
         positionMap.put(block,random.nextInt(totalPaths) + 1);
         storeInStash(pathItems);
         Collections.shuffle(stash);
         printStash();
-        printPositionMap();
+        //printPositionMap();
+        //printDummies();
         server.printTree();
         writeBack(path);
         printStash();
-        printPositionMap();
+        //printPositionMap();
         server.printTree();
     }
 
-    public void storeInStash(List <Integer> pathItems) {
-        for(Integer i : pathItems) {
-            if(positionMap.get(i)!= null) {
-                stash.add(new StashedItem(i, positionMap.get(i)));
-                positionMap.put(i, null);
+    public void storeInStash(List <BlockInfo> pathItems) {
+        for(BlockInfo i : pathItems) {
+            if(dummyBlocks.get(i.blockPos) == null) {
+                stash.add(i.blockNum);
             }
         }
     }
 
     public void writeBack(int path) {
+        Random r = new Random();
         for(int level = height; level>=0; level--) {
-            for(StashedItem i : stash) {
-                System.out.println(nodeIndexAtLevel(path, level) + " " + nodeIndexAtLevel(i.path,level));
-                if(nodeIndexAtLevel(path, level) == nodeIndexAtLevel(i.path,level)) {
-                    System.out.println("In stash " + level + " " +i.block + " " + i.path);
+            boolean isInserted = false;
+            for(Integer i : stash) {
+                //System.out.println(nodeIndexAtLevel(path, level) + " " + nodeIndexAtLevel(i.path,level));
+                if(nodeIndexAtLevel(path, level) == nodeIndexAtLevel(positionMap.get(i),level)) {
+                    //System.out.println("In stash level " + level + " " +i + " ");
                     stash.remove(i);
-                    server.insertAtPath(path, i.block);
+                    server.insertAtPath(path, i);
+                    isInserted = true;
                     break;
                 }
+            }
+            if(isInserted == false) {
+                server.insertAtPath(path, r.nextInt(totalNodes) + 1);
+                dummyBlocks.put(nodeIndexAtLevel(path, level),1);
             }
         }
     }

@@ -1,10 +1,7 @@
 package com.company;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Server {
 
@@ -29,13 +26,19 @@ public class Server {
             }
         });
         printTree();
+        return stash;
+    }
+
+    public HashMap<Integer, Integer> fillEmptyBlocksWithDummy() {
+        Random r = new Random();
+        HashMap<Integer, Integer> dummies = new HashMap<>();
         for(int i=1;i<=totalNodes;i++) {
             if(tree[i] == null) {
                 tree[i] = r.nextInt(totalNodes) + 1;
+                dummies.put(i, 1);
             }
         }
-        printTree();
-        return stash;
+        return dummies;
     }
 
     public void printTree() {
@@ -52,23 +55,23 @@ public class Server {
     }
 
     // take a path number and read all the nodes of that path
-    public List<Integer> readPath(int path) {
+    public List<BlockInfo> readPath(int path) {
 //        for(int i=1;i<=totalNodes;i++)
 //            System.out.print(tree[i] + " ");
         // First get the leaf position in tree array from path number and
         // then continue dividing the position number until you get the root.
         int leaf = getLeafFromPath(path);
-        List<Integer> pathItems = new ArrayList<>();
+        List<BlockInfo> pathItems = new ArrayList<>();
         int nodeNumber = leaf;
         while(nodeNumber >= 1) {
-            pathItems.add(tree[nodeNumber]);
+            pathItems.add(new BlockInfo(tree[nodeNumber], nodeNumber));
             tree[nodeNumber]=null;
             //System.out.print(nodeNumber + " " + tree[nodeNumber]);
             nodeNumber/=2;
         }
         System.out.println("Path: " + path);
         for(int i =0;i<pathItems.size();i++) {
-            System.out.print(pathItems.get(i) + " ");
+            System.out.print(pathItems.get(i).blockNum + " ");
         }
         System.out.println("\n\n");
         return pathItems;
