@@ -7,8 +7,8 @@ public class Main {
 
     public static void main(String[] args) {
 	// write your code here
-        System.out.println("this is path oram");
         Client client = new Client();
+        Server server = new Server();
         //server.print();
 //        server.readPath(1);
 //        server.readPath(7);
@@ -16,11 +16,12 @@ public class Main {
         client.initiate();
         client.printPositionMap();
         client.printStash();
+        client.printDummies();
         client.access("read", 2, null);
         client.access("read", 2, null);
         client.access("read", 2, null);
-//        client.nodeIndexAtLevel(1,3);
-//        client.nodeIndexAtLevel(3,2);
-//        client.nodeIndexAtLevel(6,1);
+//        client.bucketIndexAtLevel(1,2);
+//        client.bucketIndexAtLevel(3,2);
+//        client.bucketIndexAtLevel(6,5);
     }
 }

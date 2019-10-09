@@ -5,16 +5,23 @@ import java.util.*;
 
 public class Server {
 
-    private int height = 3;
-    int totalNodes = (int) Math.pow(2, height+1) - 1;
+    private int height = 2;
+    private int bucketSize = 4;
+    private int totalBuckets = (int) Math.pow(2, height+1) - 1;
+    private int totalNodes = totalBuckets * bucketSize;
     public Integer tree[] = new Integer[totalNodes+2];
 
     public int getHeight() {
         return height;
     }
+    public int getBucketSize() {
+        return bucketSize;
+    }
+    public int getTotalNodes() {
+        return totalNodes;
+    }
 
     public List<Integer> initiate(Map<Integer, Integer> positionMap) {
-        Random r = new Random();
         List<Integer> stash = new ArrayList<>();
         for(int i=0;i<=totalNodes;i++) {
             tree[i] = null;
@@ -42,16 +49,23 @@ public class Server {
     }
 
     public void printTree() {
+        int prevLevelBlocks = 0;
         for(int i=0; i <= height; i++) {
-            int nodes_of_level = (int) Math.pow(2, i);
-            for(int space = 0; space<2*height-2*i-1; space++) {
-                System.out.print(" ");
+            int curBuckets = (int) Math.pow(2, i);
+            int curBlocks = curBuckets*bucketSize;
+//            for(int space = 0; space<2*height-2*i-1; space++) {
+//                System.out.print(" ");
+//            }
+            for (int j = 1; j <= curBlocks; j++) {
+                System.out.print(tree[prevLevelBlocks + j] + " ");
+                if(j%bucketSize == 0) {
+                    System.out.print("\t");
+                }
             }
-            for (int j = 0; j < nodes_of_level; j++) {
-                System.out.print(tree[nodes_of_level + j] + "  ");
-            }
-            System.out.println();
+            prevLevelBlocks += curBlocks;
+            System.out.println("");
         }
+        System.out.print("\n");
     }
 
     // take a path number and read all the nodes of that path
@@ -60,39 +74,53 @@ public class Server {
 //            System.out.print(tree[i] + " ");
         // First get the leaf position in tree array from path number and
         // then continue dividing the position number until you get the root.
+        System.out.println("Reading path: " + path);
         int leaf = getLeafFromPath(path);
-        List<BlockInfo> pathItems = new ArrayList<>();
+        int bucketNumber = getBucketFromPath(path);
         int nodeNumber = leaf;
-        while(nodeNumber >= 1) {
-            pathItems.add(new BlockInfo(tree[nodeNumber], nodeNumber));
-            tree[nodeNumber]=null;
+        List<BlockInfo> pathItems = new ArrayList<>();
+        while(bucketNumber >= 1) {
+            for(int i =nodeNumber; i<nodeNumber+bucketSize; i++) {
+                pathItems.add(new BlockInfo(tree[i], i));
+                tree[i]=null;
+            }
             //System.out.print(nodeNumber + " " + tree[nodeNumber]);
-            nodeNumber/=2;
+            bucketNumber/=2;
+            nodeNumber = (bucketNumber-1)*bucketSize+1;
         }
+        System.out.println("");
         System.out.println("Path: " + path);
         for(int i =0;i<pathItems.size();i++) {
             System.out.print(pathItems.get(i).blockNum + " ");
         }
-        System.out.println("\n\n");
+        System.out.println("");
         return pathItems;
     }
 
     // return false if path is full and element not inserted
     public boolean insertAtPath(int path, int value) {
         int leaf = getLeafFromPath(path);
+        int bucketNumber = getBucketFromPath(path);
         int nodeNumber = leaf;
-        while(nodeNumber >= 1) {
-            if(tree[nodeNumber]==null) {
-                tree[nodeNumber] = value;
-                return true;
+        while(bucketNumber >= 1) {
+            for(int i =nodeNumber; i<nodeNumber+bucketSize; i++) {
+                if(tree[i]==null){
+                    tree[i]=value;
+                    return true;
+                }
             }
-            nodeNumber/=2;
+            bucketNumber/=2;
+            nodeNumber = (bucketNumber-1)*bucketSize+1;
         }
         return false;
     }
 
     public int getLeafFromPath(int path) {
-        return (int) Math.pow(2, height) - 1 + path;
+        return (getBucketFromPath(path) - 1)*bucketSize + 1;
+    }
+
+    public int getBucketFromPath(int path) {
+        return (int) Math.pow(2, height) -1 + path;
     }
 }
 
