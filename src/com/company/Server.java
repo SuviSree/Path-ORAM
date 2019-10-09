@@ -7,28 +7,30 @@ public class Server {
 
     private int height = 2;
     private int bucketSize = 4;
-    private int totalBuckets = (int) Math.pow(2, height+1) - 1;
+    private int totalBuckets = (int) Math.pow(2, height + 1) - 1;
     private int totalNodes = totalBuckets * bucketSize;
-    public Integer tree[] = new Integer[totalNodes+2];
+    public Integer tree[] = new Integer[totalNodes + 2];
 
     public int getHeight() {
         return height;
     }
+
     public int getBucketSize() {
         return bucketSize;
     }
+
     public int getTotalNodes() {
         return totalNodes;
     }
 
     public List<Integer> initiate(Map<Integer, Integer> positionMap) {
         List<Integer> stash = new ArrayList<>();
-        for(int i=0;i<=totalNodes;i++) {
+        for (int i = 0; i <= totalNodes; i++) {
             tree[i] = null;
         }
-        positionMap.entrySet().forEach(entry->{
+        positionMap.entrySet().forEach(entry -> {
             boolean isInserted = insertAtPath(entry.getValue(), entry.getKey());
-            if(isInserted == false) {
+            if (isInserted == false) {
                 stash.add(entry.getKey());
             }
         });
@@ -39,8 +41,8 @@ public class Server {
     public HashMap<Integer, Integer> fillEmptyBlocksWithDummy() {
         Random r = new Random();
         HashMap<Integer, Integer> dummies = new HashMap<>();
-        for(int i=1;i<=totalNodes;i++) {
-            if(tree[i] == null) {
+        for (int i = 1; i <= totalNodes; i++) {
+            if (tree[i] == null) {
                 tree[i] = r.nextInt(totalNodes) + 1;
                 dummies.put(i, 1);
             }
@@ -50,15 +52,15 @@ public class Server {
 
     public void printTree() {
         int prevLevelBlocks = 0;
-        for(int i=0; i <= height; i++) {
+        for (int i = 0; i <= height; i++) {
             int curBuckets = (int) Math.pow(2, i);
-            int curBlocks = curBuckets*bucketSize;
+            int curBlocks = curBuckets * bucketSize;
 //            for(int space = 0; space<2*height-2*i-1; space++) {
 //                System.out.print(" ");
 //            }
             for (int j = 1; j <= curBlocks; j++) {
                 System.out.print(tree[prevLevelBlocks + j] + " ");
-                if(j%bucketSize == 0) {
+                if (j % bucketSize == 0) {
                     System.out.print("\t");
                 }
             }
@@ -79,18 +81,18 @@ public class Server {
         int bucketNumber = getBucketFromPath(path);
         int nodeNumber = leaf;
         List<BlockInfo> pathItems = new ArrayList<>();
-        while(bucketNumber >= 1) {
-            for(int i =nodeNumber; i<nodeNumber+bucketSize; i++) {
+        while (bucketNumber >= 1) {
+            for (int i = nodeNumber; i < nodeNumber + bucketSize; i++) {
                 pathItems.add(new BlockInfo(tree[i], i));
-                tree[i]=null;
+                tree[i] = null;
             }
             //System.out.print(nodeNumber + " " + tree[nodeNumber]);
-            bucketNumber/=2;
-            nodeNumber = (bucketNumber-1)*bucketSize+1;
+            bucketNumber /= 2;
+            nodeNumber = (bucketNumber - 1) * bucketSize + 1;
         }
         System.out.println("");
         System.out.println("Path: " + path);
-        for(int i =0;i<pathItems.size();i++) {
+        for (int i = 0; i < pathItems.size(); i++) {
             System.out.print(pathItems.get(i).blockNum + " ");
         }
         System.out.println("");
@@ -102,25 +104,25 @@ public class Server {
         int leaf = getLeafFromPath(path);
         int bucketNumber = getBucketFromPath(path);
         int nodeNumber = leaf;
-        while(bucketNumber >= 1) {
-            for(int i =nodeNumber; i<nodeNumber+bucketSize; i++) {
-                if(tree[i]==null){
-                    tree[i]=value;
+        while (bucketNumber >= 1) {
+            for (int i = nodeNumber; i < nodeNumber + bucketSize; i++) {
+                if (tree[i] == null) {
+                    tree[i] = value;
                     return true;
                 }
             }
-            bucketNumber/=2;
-            nodeNumber = (bucketNumber-1)*bucketSize+1;
+            bucketNumber /= 2;
+            nodeNumber = (bucketNumber - 1) * bucketSize + 1;
         }
         return false;
     }
 
     public int getLeafFromPath(int path) {
-        return (getBucketFromPath(path) - 1)*bucketSize + 1;
+        return (getBucketFromPath(path) - 1) * bucketSize + 1;
     }
 
     public int getBucketFromPath(int path) {
-        return (int) Math.pow(2, height) -1 + path;
+        return (int) Math.pow(2, height) - 1 + path;
     }
 }
 

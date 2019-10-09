@@ -1,4 +1,5 @@
 package com.company;
+
 import java.util.*;
 
 public class Client {
@@ -13,12 +14,12 @@ public class Client {
     public void initiate() {
         System.out.println("INITIALIZATION");
         Random random = new Random();
-        for(int i=1; i<=totalNodes;i++) {
+        for (int i = 1; i <= totalNodes; i++) {
             int pathNumber = random.nextInt(totalPaths) + 1;
             positionMap.put(i, pathNumber);
         }
-        List <Integer> overflowedData = server.initiate(positionMap);
-        for(Integer i : overflowedData) {
+        List<Integer> overflowedData = server.initiate(positionMap);
+        for (Integer i : overflowedData) {
             //System.out.println("stashed : " + i);
             stash.add(i);
         }
@@ -29,12 +30,12 @@ public class Client {
     public void printPositionMap() {
         System.out.println("\nPosition Map");
         System.out.print("Block:\t");
-        positionMap.entrySet().forEach(entry->{
+        positionMap.entrySet().forEach(entry -> {
             System.out.print(entry.getKey() + "\t");
         });
         System.out.println();
         System.out.print("Path:\t");
-        positionMap.entrySet().forEach(entry->{
+        positionMap.entrySet().forEach(entry -> {
             System.out.print(entry.getValue() + "\t");
         });
         System.out.println("");
@@ -42,7 +43,7 @@ public class Client {
 
     public void printStash() {
         System.out.println("\n\nStash");
-        for(Integer i : stash) {
+        for (Integer i : stash) {
             System.out.print(i + " ");
         }
         System.out.print("\n\n");
@@ -50,7 +51,7 @@ public class Client {
 
     public void printDummies() {
         System.out.println("\n\nDummy block positions");
-        dummyBlocks.entrySet().forEach(entry->{
+        dummyBlocks.entrySet().forEach(entry -> {
             System.out.print(entry.getKey() + "\t");
         });
         System.out.print("\n\n");
@@ -60,8 +61,8 @@ public class Client {
         System.out.println("ACCESSING BLOCK: " + block);
         Random random = new Random();
         int path = positionMap.get(block);
-        List <BlockInfo> pathItems = server.readPath(path);
-        positionMap.put(block,random.nextInt(totalPaths) + 1);
+        List<BlockInfo> pathItems = server.readPath(path);
+        positionMap.put(block, random.nextInt(totalPaths) + 1);
         storeInStash(pathItems);
         Collections.shuffle(stash);
         printStash();
@@ -74,9 +75,9 @@ public class Client {
         printDummies();
     }
 
-    public void storeInStash(List <BlockInfo> pathItems) {
-        for(BlockInfo i : pathItems) {
-            if(dummyBlocks.get(i.blockPos) == null) {
+    public void storeInStash(List<BlockInfo> pathItems) {
+        for (BlockInfo i : pathItems) {
+            if (dummyBlocks.get(i.blockPos) == null) {
                 stash.add(i.blockNum);
             }
         }
@@ -85,12 +86,12 @@ public class Client {
     public void writeBack(int path) {
         System.out.println("Writing to path: " + path);
         Random r = new Random();
-        for(int level = height; level>=0; level--) {
-            for(int k=1;k<=server.getBucketSize();k++) {
+        for (int level = height; level >= 0; level--) {
+            for (int k = 1; k <= server.getBucketSize(); k++) {
                 boolean isInserted = false;
-                for(Integer i : stash) {
+                for (Integer i : stash) {
                     //System.out.println(nodeIndexAtLevel(path, level) + " " + nodeIndexAtLevel(i.path,level));
-                    if(bucketIndexAtLevel(path, level) == bucketIndexAtLevel(positionMap.get(i),level)) {
+                    if (bucketIndexAtLevel(path, level) == bucketIndexAtLevel(positionMap.get(i), level)) {
                         //System.out.println("In stash level " + level + " " +i + " ");
                         stash.remove(i);
                         server.insertAtPath(path, i);
@@ -98,18 +99,18 @@ public class Client {
                         break;
                     }
                 }
-                if(isInserted == false) {
+                if (isInserted == false) {
                     server.insertAtPath(path, r.nextInt(totalNodes) + 1);
-                    dummyBlocks.put(bucketIndexAtLevel(path, level),1);
+                    dummyBlocks.put(bucketIndexAtLevel(path, level), 1);
                 }
             }
         }
     }
 
-    public Integer bucketIndexAtLevel (int path, int level) {
+    public Integer bucketIndexAtLevel(int path, int level) {
         int bucket = server.getBucketFromPath(path);
         int height = server.getHeight();
-        for(int i = height; i > level; i--) {
+        for (int i = height; i > level; i--) {
             //System.out.println(i + " " + height + " " +level);
             bucket /= 2;
         }
