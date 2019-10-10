@@ -64,7 +64,7 @@ public class Client {
         List<BlockInfo> pathItems = server.readPath(path);
         positionMap.put(block, random.nextInt(totalPaths) + 1);
         storeInStash(pathItems);
-        Collections.shuffle(stash);
+        //Collections.shuffle(stash);
         printStash();
         printPositionMap();
         printDummies();
