@@ -1,6 +1,7 @@
 package com.company;
 
 
+import javax.crypto.SecretKey;
 import java.util.*;
 
 public class Server {
@@ -9,7 +10,8 @@ public class Server {
     private int bucketSize = 4;
     private int totalBuckets = (int) Math.pow(2, height + 1) - 1;
     private int totalNodes = totalBuckets * bucketSize;
-    public Integer tree[] = new Integer[totalNodes + 2];
+    public String tree[] = new String[totalNodes + 2];
+    AES aes = AES.getInstance();
 
     public int getHeight() {
         return height;
@@ -29,7 +31,12 @@ public class Server {
             tree[i] = null;
         }
         positionMap.entrySet().forEach(entry -> {
-            boolean isInserted = insertAtPath(entry.getValue(), entry.getKey());
+            boolean isInserted = false;
+            try {
+                isInserted = insertAtPath(entry.getValue(), entry.getKey());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             if (isInserted == false) {
                 stash.add(entry.getKey());
             }
@@ -38,11 +45,11 @@ public class Server {
         return stash;
     }
 
-    public void fillEmptyBlocksWithDummy() {
+    public void fillEmptyBlocksWithDummy() throws Exception {
         Random r = new Random();
         for (int i = 1; i <= totalNodes; i++) {
             if (tree[i] == null) {
-                tree[i] = -1;
+                tree[i] = aes.encryptText("-1", aes.secretKey).toString();
             }
         }
     }
@@ -68,7 +75,7 @@ public class Server {
     }
 
     // take a path number and read all the nodes of that path
-    public List<BlockInfo> readPath(int path) {
+    public List<BlockInfo> readPath(int path) throws Exception {
 //        for(int i=1;i<=totalNodes;i++)
 //            System.out.print(tree[i] + " ");
         // First get the leaf position in tree array from path number and
@@ -80,7 +87,8 @@ public class Server {
         List<BlockInfo> pathItems = new ArrayList<>();
         while (bucketNumber >= 1) {
             for (int i = nodeNumber; i < nodeNumber + bucketSize; i++) {
-                pathItems.add(new BlockInfo(tree[i], i));
+                //String decryptedText = aes.decryptText(tree[i], aes.secretKey);
+                pathItems.add(new BlockInfo(Integer.parseInt(aes.decryptText(tree[i], aes.secretKey)), i));
                 tree[i] = null;
             }
             //System.out.print(nodeNumber + " " + tree[nodeNumber]);
@@ -97,14 +105,14 @@ public class Server {
     }
 
     // return false if path is full and element not inserted
-    public boolean insertAtPath(int path, int value) {
+    public boolean insertAtPath(int path, int value) throws Exception {
         int leaf = getLeafFromPath(path);
         int bucketNumber = getBucketFromPath(path);
         int nodeNumber = leaf;
         while (bucketNumber >= 1) {
             for (int i = nodeNumber; i < nodeNumber + bucketSize; i++) {
                 if (tree[i] == null) {
-                    tree[i] = value;
+                    tree[i] = aes.encryptText(Integer.toString(value), aes.secretKey).toString();
                     return true;
                 }
             }

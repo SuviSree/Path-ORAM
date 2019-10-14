@@ -11,7 +11,7 @@ public class Client {
     Map<Integer, Integer> positionMap = new HashMap<>();
     List<Integer> stash = new ArrayList<>();
 
-    public void initiate() {
+    public void initiate() throws Exception {
         System.out.println("INITIALIZATION");
         Random random = new Random();
         for (int i = 1; i <= totalBlocks; i++) {
@@ -48,7 +48,7 @@ public class Client {
         System.out.print("\n\n");
     }
 
-    public void access(String operation, int block, Integer data) {
+    public void access(String operation, int block, Integer data) throws Exception {
         System.out.println("ACCESSING BLOCK: " + block);
         Random random = new Random();
         int path = positionMap.get(block);
@@ -72,7 +72,7 @@ public class Client {
         }
     }
 
-    public void writeBack(int path) {
+    public void writeBack(int path) throws Exception {
         System.out.println("Writing to path: " + path);
         Random r = new Random();
         for (int level = height; level >= 0; level--) {
