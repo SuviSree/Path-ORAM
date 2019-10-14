@@ -38,16 +38,13 @@ public class Server {
         return stash;
     }
 
-    public HashMap<Integer, Integer> fillEmptyBlocksWithDummy() {
+    public void fillEmptyBlocksWithDummy() {
         Random r = new Random();
-        HashMap<Integer, Integer> dummies = new HashMap<>();
         for (int i = 1; i <= totalNodes; i++) {
             if (tree[i] == null) {
-                tree[i] = r.nextInt(totalNodes) + 1;
-                dummies.put(i, 1);
+                tree[i] = -1;
             }
         }
-        return dummies;
     }
 
     public void printTree() {
@@ -124,6 +121,7 @@ public class Server {
     public int getBucketFromPath(int path) {
         return (int) Math.pow(2, height) - 1 + path;
     }
+    
 }
 
 

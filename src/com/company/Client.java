@@ -7,23 +7,22 @@ public class Client {
     int height = server.getHeight();
     int totalNodes = server.getTotalNodes();
     int totalPaths = (int) Math.pow(2, server.getHeight());
+    int totalBlocks = totalNodes/2;
     Map<Integer, Integer> positionMap = new HashMap<>();
     List<Integer> stash = new ArrayList<>();
-    HashMap<Integer, Integer> dummyBlocks = new HashMap();
 
     public void initiate() {
         System.out.println("INITIALIZATION");
         Random random = new Random();
-        for (int i = 1; i <= totalNodes; i++) {
+        for (int i = 1; i <= totalBlocks; i++) {
             int pathNumber = random.nextInt(totalPaths) + 1;
             positionMap.put(i, pathNumber);
         }
         List<Integer> overflowedData = server.initiate(positionMap);
         for (Integer i : overflowedData) {
-            //System.out.println("stashed : " + i);
             stash.add(i);
         }
-        dummyBlocks = server.fillEmptyBlocksWithDummy();
+        server.fillEmptyBlocksWithDummy();
         server.printTree();
     }
 
@@ -49,14 +48,6 @@ public class Client {
         System.out.print("\n\n");
     }
 
-    public void printDummies() {
-        System.out.println("\n\nDummy block positions");
-        dummyBlocks.entrySet().forEach(entry -> {
-            System.out.print(entry.getKey() + "\t");
-        });
-        System.out.print("\n\n");
-    }
-
     public void access(String operation, int block, Integer data) {
         System.out.println("ACCESSING BLOCK: " + block);
         Random random = new Random();
@@ -67,17 +58,15 @@ public class Client {
         //Collections.shuffle(stash);
         printStash();
         printPositionMap();
-        printDummies();
         server.printTree();
         writeBack(path);
         printStash();
         server.printTree();
-        printDummies();
     }
 
     public void storeInStash(List<BlockInfo> pathItems) {
         for (BlockInfo i : pathItems) {
-            if (dummyBlocks.get(i.blockPos) == null) {
+            if (i.blockNum != -1) {
                 stash.add(i.blockNum);
             }
         }
@@ -100,8 +89,7 @@ public class Client {
                     }
                 }
                 if (isInserted == false) {
-                    server.insertAtPath(path, r.nextInt(totalNodes) + 1);
-                    dummyBlocks.put(bucketIndexAtLevel(path, level), 1);
+                    server.insertAtPath(path, -1);
                 }
             }
         }

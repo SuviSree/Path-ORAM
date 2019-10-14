@@ -8,9 +8,14 @@ public class Main {
         client.initiate();
         client.printPositionMap();
         client.printStash();
-        client.printDummies();
         client.access("read", 2, null);
         client.access("read", 2, null);
         client.access("read", 2, null);
+//        String s = AES.encryptText("sadman", );
+//        System.out.println(s + " " + AES.decrypt(s, "sakib"));
+//        System.out.println(s + " " + AES.decrypt(s, "sakib"));
+//        System.out.println(s + " " + AES.decrypt(s, "sakib"));
+//        System.out.println(s + " " + AES.decrypt(s, "sakib"));
+
     }
 }
