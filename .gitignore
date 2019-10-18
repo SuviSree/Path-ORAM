@@ -5,5 +5,5 @@ out/
 src/.DS_Store
 src/com/.DS_Store
 out/
-files/
+files/*
 src/META-INF
