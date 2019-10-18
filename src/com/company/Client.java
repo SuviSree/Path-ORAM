@@ -7,7 +7,7 @@ public class Client {
     int height = server.getHeight();
     int totalNodes = server.getTotalNodes();
     int totalPaths = (int) Math.pow(2, server.getHeight());
-    int totalBlocks = totalNodes/2;
+    int totalBlocks = (int) Math.pow(2, server.getHeight()+1);
     Map<Integer, Integer> positionMap = new HashMap<>();
     List<Integer> stash = new ArrayList<>();
 
@@ -23,7 +23,7 @@ public class Client {
             stash.add(i);
         }
         server.fillEmptyBlocksWithDummy();
-        server.printTree();
+        //server.printTree();
     }
 
     public void printPositionMap() {
@@ -56,12 +56,13 @@ public class Client {
         positionMap.put(block, random.nextInt(totalPaths) + 1);
         storeInStash(pathItems);
         //Collections.shuffle(stash);
-        printStash();
-        printPositionMap();
-        server.printTree();
+        //printStash();
+        //printPositionMap();
+        //server.printTree();
         writeBack(path);
-        printStash();
-        server.printTree();
+        //System.out.println("load: " + String.format("%.2f", server.calculateLoad(0)));
+        //printStash();
+        //server.printTree();
     }
 
     public void storeInStash(List<BlockInfo> pathItems) {
@@ -73,7 +74,7 @@ public class Client {
     }
 
     public void writeBack(int path) throws Exception {
-        System.out.println("Writing to path: " + path);
+        //System.out.println("Writing to path: " + path);
         Random r = new Random();
         for (int level = height; level >= 0; level--) {
             for (int k = 1; k <= server.getBucketSize(); k++) {
