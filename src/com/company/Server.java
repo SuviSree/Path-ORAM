@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class Server {
 
-    private int height = 4;
-    private int bucketSize = 4;
+    private int height = 6;
+    private int bucketSize = 3;
     private int totalBuckets = (int) Math.pow(2, height + 1) - 1;
     private int totalNodes = totalBuckets * bucketSize;
     public String tree[] = new String[totalNodes + 2];
@@ -20,10 +20,6 @@ public class Server {
 
     public int getBucketSize() {
         return bucketSize;
-    }
-
-    public int getTotalNodes() {
-        return totalNodes;
     }
 
     public List<Integer> initiate(Map<Integer, Integer> positionMap) {
@@ -98,9 +94,8 @@ public class Server {
 //        System.out.println("");
 //        System.out.println("Path: " + path);
 //        for (int i = 0; i < pathItems.size(); i++) {
-//            System.out.print(pathItems.get(i).blockNum + " ");
+//            System.out.print(pathItems.get(i).blockPos + "," + pathItems.get(i).blockNum + " ");
 //        }
-//        System.out.println("");
         return pathItems;
     }
 
@@ -139,7 +134,7 @@ public class Server {
                 usedBlocks++;
             }
         }
-        //System.out.println(usedBlocks);
+        //System.out.println("blocks used "+ usedBlocks);
         return usedBlocks;
     }
 
