@@ -1,13 +1,14 @@
 package com.company;
 
 
-import javax.crypto.SecretKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Server {
 
-    private int height = 2;
-    private int bucketSize = 4;
+    private int height = 6;
+    private int bucketSize = 3;
     private int totalBuckets = (int) Math.pow(2, height + 1) - 1;
     private int totalNodes = totalBuckets * bucketSize;
     public String tree[] = new String[totalNodes + 2];
@@ -19,10 +20,6 @@ public class Server {
 
     public int getBucketSize() {
         return bucketSize;
-    }
-
-    public int getTotalNodes() {
-        return totalNodes;
     }
 
     public List<Integer> initiate(Map<Integer, Integer> positionMap) {
@@ -41,12 +38,11 @@ public class Server {
                 stash.add(entry.getKey());
             }
         });
-        printTree();
+        //printTree();
         return stash;
     }
 
     public void fillEmptyBlocksWithDummy() throws Exception {
-        Random r = new Random();
         for (int i = 1; i <= totalNodes; i++) {
             if (tree[i] == null) {
                 tree[i] = aes.encryptText("-1", aes.secretKey).toString();
@@ -80,7 +76,7 @@ public class Server {
 //            System.out.print(tree[i] + " ");
         // First get the leaf position in tree array from path number and
         // then continue dividing the position number until you get the root.
-        System.out.println("Reading path: " + path);
+        //System.out.println("Reading path: " + path);
         int leaf = getLeafFromPath(path);
         int bucketNumber = getBucketFromPath(path);
         int nodeNumber = leaf;
@@ -95,12 +91,11 @@ public class Server {
             bucketNumber /= 2;
             nodeNumber = (bucketNumber - 1) * bucketSize + 1;
         }
-        System.out.println("");
-        System.out.println("Path: " + path);
-        for (int i = 0; i < pathItems.size(); i++) {
-            System.out.print(pathItems.get(i).blockNum + " ");
-        }
-        System.out.println("");
+//        System.out.println("");
+//        System.out.println("Path: " + path);
+//        for (int i = 0; i < pathItems.size(); i++) {
+//            System.out.print(pathItems.get(i).blockPos + "," + pathItems.get(i).blockNum + " ");
+//        }
         return pathItems;
     }
 
@@ -112,7 +107,7 @@ public class Server {
         while (bucketNumber >= 1) {
             for (int i = nodeNumber; i < nodeNumber + bucketSize; i++) {
                 if (tree[i] == null) {
-                    tree[i] = aes.encryptText(Integer.toString(value), aes.secretKey).toString();
+                    tree[i] = aes.encryptText(Integer.toString(value), aes.secretKey);
                     return true;
                 }
             }
@@ -128,6 +123,24 @@ public class Server {
 
     public int getBucketFromPath(int path) {
         return (int) Math.pow(2, height) - 1 + path;
+    }
+
+    public int calculateLoad(int level) throws Exception {
+        int usedBlocks = 0;
+        int blockStart = ((int) Math.pow(2, level) - 1) * bucketSize + 1;
+        int blockEnd = blockStart + (int) Math.pow(2, level) * bucketSize - 1;
+        for(int i=blockStart; i<=blockEnd;i++) {
+            if(!aes.decryptText(tree[i], aes.secretKey).equals("-1")) {
+                usedBlocks++;
+            }
+        }
+        //System.out.println("blocks used "+ usedBlocks);
+        return usedBlocks;
+    }
+
+    public double calculateAverageLoad(Long load, int level, Long maxIteration) {
+        int blocksInLevel = (int) Math.pow(2, level) * bucketSize;
+        return load * 100.0/(blocksInLevel * maxIteration);
     }
     
 }
